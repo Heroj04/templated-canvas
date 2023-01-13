@@ -53,18 +53,6 @@ enum ImageScaleType {
 	Stretch = 'stretch',
 }
 
-enum TextAlign {
-	Start = 'start',
-	Center = 'center',
-	Right = 'right',
-}
-
-enum TextBaseline {
-	Top = 'top',
-	Middle = 'middle',
-	Bottom = 'bottom',
-}
-
 interface Layer {
 	type: LayerType;
 	description: string;
@@ -87,8 +75,8 @@ interface TextLayer extends Layer {
 	text: string;
 	font: string;
 	fillStyle: string;
-	align: TextAlign;
-	baseline: TextBaseline;
+	align: CanvasTextAlign;
+	baseline: CanvasTextBaseline;
 	wrapText: boolean;
 	scaleText: boolean;
 	lineSpacing: number;
@@ -96,12 +84,14 @@ interface TextLayer extends Layer {
 		[key: string]: string;
 	};
 	fontReplace: {
-		[key: string]: {
-			dropShadow: DropShadow;
-			font: string;
-			fillStyle: string;
-		};
+		[key: string]: FontStyle;
 	};
+}
+
+interface FontStyle {
+	dropShadow?: DropShadow;
+	font: string;
+	fillStyle: string;
 }
 
 interface ImageLayer extends Layer {
@@ -137,14 +127,7 @@ async function drawLayer(layer: Layer, context: CanvasRenderingContext2D, inputs
 	}
 
 	// Substitute layer properties from inputs
-	for (const layerProperty in layer.inputs) {
-		if (Object.prototype.hasOwnProperty.call(layer.inputs, layerProperty)) {
-			const inputName = layer.inputs[layerProperty];
-			if (inputs[inputName]) {
-				layer[layerProperty] = inputs[inputName]
-			}
-		}
-	}
+	Object.assign(layer, layer.inputs);
 
 	// Draw the layers
 	switch (layer.type) {
@@ -187,7 +170,7 @@ async function drawGroupLayer(layer: GroupLayer, context: CanvasRenderingContext
 		const subLayer = layer.layers[index];
 		try {
 			await drawLayer(subLayer, subContext, inputs)
-		} catch (error) {
+		} catch (error: any) {
 			console.error(`Failed to draw layer ${subLayer.description} - ${error.message}`)
 		}
 	}
@@ -230,13 +213,6 @@ async function drawMaskLayer(layer: MaskLayer, context: CanvasRenderingContext2D
 }
 
 export async function generateCard(template: Template, inputs: InputValues) {
-	// 69.6mm x 95.0mm (63mm x 88mm with bleed)
-	// 300 dpi
-	// const canvas = createCanvas(822, 1122)
-	// 600 dpi
-	// const canvas = createCanvas(1644, 2244)
-	// 1200 dpi
-	// let canvas = createCanvas(3288, 4288)
 
 	// Load Custom Fonts
 	template.customFonts.forEach(async font => {
@@ -247,10 +223,6 @@ export async function generateCard(template: Template, inputs: InputValues) {
 	const canvas = createCanvas(template.width, template.height)
 	const context = canvas.getContext("2d")
 
-	// Fill the base Layer
-	//context.fillStyle = template.base
-	//context.fillRect(0, 0, template.width, template.height)
-
 	// Invert the Layer Order
 	template.layers.reverse()
 
@@ -260,7 +232,7 @@ export async function generateCard(template: Template, inputs: InputValues) {
 		const layer = template.layers[index];
 		try {
 			await drawLayer(layer, context, inputs)
-		} catch (error) {
+		} catch (error: any) {
 			console.error(`Failed to draw layer ${layer.description} - ${error.message}`)
 		}
 	}
@@ -347,8 +319,57 @@ async function scaleImageLayer(layer: ImageLayer) {
 	return canvas
 }
 
+function extractTags(string: string, tags: {[tag: string]: any}, defaultTag?: any) {
+	const regex = /(?<!\\)(?:\\{2})*<(.+?)>(.+?)(?<!\\)(?:\\{2})*<\/\1>/g;
+	const output = [];
+	const nextCheck  = [{string, font: defaultTag}];
+
+	while (nextCheck.length > 0) {
+		// Update the match
+		const match = regex.exec(nextCheck[0].string);
+
+		// If no match just move to the output and continue
+		if (!match) {
+			output.push(nextCheck.pop());
+			continue;
+		}
+
+		// Pull any varaibles we need
+		const tagText = match[1];
+		const matchedText = match[2];
+		const index = match.index;
+		const string = nextCheck[nextCheck.length - 1].string;
+		const font = nextCheck[nextCheck.length - 1].font;
+
+		// Remove that check from the stack
+		nextCheck.pop();
+
+		// Push any text before the match to the output
+		output.push({
+			string: string.substring(0, index),
+			font
+		});
+
+		// Push any text after the output onto the stack to check later
+		nextCheck.push({
+			string: string.substring(regex.lastIndex),
+			font
+		});
+
+		// Push the matched text onto the stack to check for nested tags
+		nextCheck.push({
+			string: matchedText,
+			font: tags[tagText] || font
+		});
+
+		// Update the regex so we check from the start
+		regex.lastIndex = 0;
+	}
+}
+
 // Function that takes a text layer and returns a the text scaled, wrapped as the correct font as a canvas
 function scaleTextLayer(layer: TextLayer) {
+
 	// Make sure we've actually got a text layer
 	if (layer.type != "text") {
 		throw new Error("Tried to scale a non image layer")
@@ -374,14 +395,15 @@ function scaleTextLayer(layer: TextLayer) {
 
 	// Build an array of fonts & Strings
 	// This was the most confusing shit ever to work through
-	let stringsWithFonts = []
-	const temp = {
+	let stringsWithFonts: {text: string, font: FontStyle}[] = [{
 		text,
-		font: layer.font,
-		fillStyle: layer.fillStyle,
-		dropShadow: layer.dropShadow
-	}
-	stringsWithFonts.push(temp)
+		font: {
+			font: layer.font,
+			fillStyle: layer.fillStyle,
+			dropShadow: layer.dropShadow
+		}
+	}]
+
 	for (const seperatorString in layer.fontReplace) {
 		if (Object.prototype.hasOwnProperty.call(layer.fontReplace, seperatorString)) {
 			const font = layer.fontReplace[seperatorString].font;
@@ -695,7 +717,7 @@ function scaleTextLayer(layer: TextLayer) {
 	return canvas
 }
 
-function processConditions(conditions: Condition | undefined, inputs: InputValues) {
+function processConditions(conditions: Condition | undefined, inputs: InputValues): boolean {
 	// If no conditions are specified default true
 	if (conditions == undefined) {
 		return true
@@ -704,92 +726,43 @@ function processConditions(conditions: Condition | undefined, inputs: InputValue
 	// create an array of results
 	const results = []
 
+	// Setup our operator functions
+	const operatorFunctions: { [operator: string]: (param1: any, key: string) => boolean } = {
+        "$match": (pattern: RegExp, key: string) => inputs[key]?.match(pattern),
+        "$lt": (value: any, key: string) => inputs[key] < value,
+        "$lte": (value: any, key: string) => inputs[key] <= value,
+        "$gt": (value: any, key: string) => inputs[key] > value,
+        "$gte": (value: any, key: string) => inputs[key] >= value,
+        "$in": (values: any[], key: string) => values.includes(inputs[key])
+    }
+
+	const subConditionOperatorFunctions: { [operator: string]: (param1: any) => boolean } = {
+		"$or": (subConditions: Condition[]) =>  subConditions.some(condition => processConditions(condition, inputs)),
+		"$not": (condition: Condition) => !processConditions(condition, inputs)
+    }
+
+	// For each key defined in the conditions
 	for (const key in conditions) {
-		if (Object.prototype.hasOwnProperty.call(conditions, key)) {
-			const element = conditions[key];
-			
-			switch (key) {
-				case "$or": {
-					// Process Or statement
-					let anyTrue = false
-					element.forEach((subConditions: Condition | undefined) => {
-						const output = processConditions(subConditions, inputs)
-						if (output) {
-							anyTrue = true
-						}
-					});
-					results.push(anyTrue)
-					break;
-				}
+		if (!Object.prototype.hasOwnProperty.call(conditions, key)) continue;
+        const element = conditions[key];
 
-				case "$not": {
-					// Process Or statement
-					const inner = processConditions(element, inputs)
-					results.push(!inner)
-					break;
-				}
+		// If key is an subConditionOperator (i.e., a top level operator)
+        if (typeof subConditionOperatorFunctions[key] === "function") {
+            results.push(subConditionOperatorFunctions[key](element))
+        } else if (typeof element == "object") {
+			// If element is an object (i.e., containing operators)
+            for (const subCondition in element) {
+				if (!Object.prototype.hasOwnProperty.call(element, subCondition)) continue;
+                if (typeof operatorFunctions[subCondition] === "function") {
+                    results.push(operatorFunctions[subCondition](element[subCondition], key))
+                }
+            }
+        } else {
+			// Otherwise its a value and just compare to inputs
+            results.push(element === inputs[key])
+        }
+    }
 
-				default:
-					// If element is an object (has subconditions like < > !)
-					if (typeof element == "object") {
-						// For each property in the object
-						for (const subCondition in element) {
-							if (Object.prototype.hasOwnProperty.call(element, subCondition)) {
-								const subConditionData = element[subCondition];
-
-								// Switch on operators
-								switch (subCondition) {
-									case "$match":
-										// Regex match
-										results.push(inputs[key].match(subConditionData))
-										break;
-									
-									case "$lt":
-										// Less than
-										results.push(inputs[key] < subConditionData)
-										break;
-									
-									case "$lte":
-										// Less than or equal to
-										results.push(inputs[key] <= subConditionData)
-										break;
-
-									case "$gt":
-										//Greater than
-										results.push(inputs[key] > subConditionData)
-										break;
-
-									case "$gte":
-										// Greater than or equal to
-										results.push(inputs[key] >= subConditionData)
-										break;
-
-									case "$in":
-										// In array
-										results.push(subConditionData.includes(inputs[key]))
-										break;
-
-									default:
-										break;
-								}
-							}
-						}
-					} else {
-						// Check if input equals check condition
-						results.push(element == inputs[key])
-					}
-					break;
-			}
-		}
-	}
-
-	// Check the results and return false if anything is false
-	for (let index = 0; index < results.length; index++) {
-		const result = results[index];
-		if (!result) {
-			return false
-		}
-	}
-	// Nothing was false so return true
-	return true
+	// Return true if there are no falses in our results
+    return !results.includes(false)
 }
