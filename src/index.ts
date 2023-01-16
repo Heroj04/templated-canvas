@@ -326,8 +326,8 @@ function extractTags(string: string, tags: {[tag: string]: any}, defaultTag?: an
 
 	while (nextCheck.length > 0) {
 		// Update the match
-		const match = regex.exec(nextCheck[0].string);
-
+		const match = regex.exec(nextCheck[nextCheck.length - 1].string);
+		
 		// If no match just move to the output and continue
 		if (!match) {
 			output.push(nextCheck.pop());
@@ -335,8 +335,8 @@ function extractTags(string: string, tags: {[tag: string]: any}, defaultTag?: an
 		}
 
 		// Pull any varaibles we need
-		const tagText = match[1];
-		const matchedText = match[2];
+		const tag = match[1];
+		const text = match[2];
 		const index = match.index;
 		const string = nextCheck[nextCheck.length - 1].string;
 		const font = nextCheck[nextCheck.length - 1].font;
@@ -345,26 +345,34 @@ function extractTags(string: string, tags: {[tag: string]: any}, defaultTag?: an
 		nextCheck.pop();
 
 		// Push any text before the match to the output
-		output.push({
-			string: string.substring(0, index),
-			font
-		});
+		if (string.substring(0, index)) {
+			output.push({
+				string: string.substring(0, index),
+				font
+			});
+		}
 
 		// Push any text after the output onto the stack to check later
-		nextCheck.push({
-			string: string.substring(regex.lastIndex),
-			font
-		});
+		if (string.substring(regex.lastIndex)) {
+			nextCheck.push({
+				string: string.substring(regex.lastIndex),
+				font
+			});
+		}
 
 		// Push the matched text onto the stack to check for nested tags
-		nextCheck.push({
-			string: matchedText,
-			font: tags[tagText] || font
-		});
+		if (text) {
+			nextCheck.push({
+				string: text,
+				font: tags[tag] || font
+			});
+		}
 
 		// Update the regex so we check from the start
 		regex.lastIndex = 0;
 	}
+
+	return output;
 }
 
 // Function that takes a text layer and returns a the text scaled, wrapped as the correct font as a canvas
