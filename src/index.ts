@@ -53,11 +53,24 @@ enum ImageScaleType {
 	Stretch = 'stretch',
 }
 
+enum Anchor {
+	TopLeft = 'topLeft',
+	TopCenter = 'topCenter',
+	TopRight = 'topRight',
+	MiddleLeft = 'middleLeft',
+	MiddleCenter = 'middleCenter',
+	MiddleRight = 'middleRight',
+	BottomLeft = 'bottomLeft',
+	BottomCenter = 'bottomCenter',
+	BottomRight = 'bottomRight',
+}
+
 interface Layer {
 	type: LayerType;
 	description: string;
 	originX: number;
 	originY: number;
+	Anchor: Anchor;
 	width: number;
 	height: number;
 	conditions?: Condition;
@@ -73,25 +86,25 @@ interface GroupLayer extends Layer {
 
 interface TextLayer extends Layer {
 	text: string;
-	font: string;
-	fillStyle: string;
+	style: TextStyle;
 	align: CanvasTextAlign;
 	baseline: CanvasTextBaseline;
 	wrapText: boolean;
+	// TODO wrapWithHyphens: boolean;
 	scaleText: boolean;
 	lineSpacing: number;
 	textReplace: {
 		[key: string]: string;
 	};
-	fontReplace: {
-		[key: string]: FontStyle;
+	styleReplace: {
+		[key: string]: TextStyle;
 	};
 }
 
-interface FontStyle {
-	dropShadow?: DropShadow;
+interface TextStyle {
 	font: string;
 	fillStyle: string;
+	dropShadow?: DropShadow;
 }
 
 interface ImageLayer extends Layer {
@@ -180,7 +193,29 @@ async function drawGroupLayer(layer: GroupLayer, context: CanvasRenderingContext
 
 async function drawTextLayer(layer: TextLayer, context: CanvasRenderingContext2D, inputs: InputValues) {
 	// Scale Text to size
-	const scaledText = await scaleTextLayer(layer)
+	// const scaledText = await scaleTextLayer(layer)
+
+	// Extract all the tags from the text
+	const styledText = extractTags(layer.text, layer.styleReplace, layer.style)
+
+	// TODO - Seperate Paragraph breaks from line breaks (Two breaks in a row for paragraph?)
+	const lines: {string: string, style: TextStyle}[][] = [[]]
+	styledText.forEach(stringStyle => {
+		const splitString = stringStyle.string.split('\n');
+		do {
+			lines[lines.length - 1].push({string: splitString[0], style: stringStyle.style});
+			if (splitString.length > 1) {
+				lines.push([]);
+			}
+			splitString.splice(0)
+		} while (splitString.length > 0);
+	})
+
+	// TODO - Word Wrapping - Hypenation and Scaling
+	
+
+	// TODO - Write Text to a canvas to be drawn onto original
+
 	// Draw the text to the canvas
 	context.drawImage(scaledText, layer.originX, layer.originY, layer.width, layer.height)
 }
@@ -319,10 +354,10 @@ async function scaleImageLayer(layer: ImageLayer) {
 	return canvas
 }
 
-function extractTags(string: string, tags: {[tag: string]: any}, defaultTag?: any) {
+function extractTags(string: string, tags: {[tag: string]: TextStyle}, defaultTag: TextStyle): {string: string, style: TextStyle}[] {
 	const regex = /(?<!\\)(?:\\{2})*<(.+?)>(.+?)(?<!\\)(?:\\{2})*<\/\1>/g;
-	const output = [];
-	const nextCheck  = [{string, font: defaultTag}];
+	const output: {string: string, style: TextStyle}[] = [];
+	const nextCheck  = [{string, style: defaultTag}];
 
 	while (nextCheck.length > 0) {
 		// Update the match
@@ -330,7 +365,9 @@ function extractTags(string: string, tags: {[tag: string]: any}, defaultTag?: an
 		
 		// If no match just move to the output and continue
 		if (!match) {
-			output.push(nextCheck.pop());
+			let currentTest = nextCheck.pop();
+			if (!currentTest) continue;
+			output.push(currentTest);
 			continue;
 		}
 
@@ -339,7 +376,7 @@ function extractTags(string: string, tags: {[tag: string]: any}, defaultTag?: an
 		const text = match[2];
 		const index = match.index;
 		const string = nextCheck[nextCheck.length - 1].string;
-		const font = nextCheck[nextCheck.length - 1].font;
+		const style = nextCheck[nextCheck.length - 1].style;
 
 		// Remove that check from the stack
 		nextCheck.pop();
@@ -348,7 +385,7 @@ function extractTags(string: string, tags: {[tag: string]: any}, defaultTag?: an
 		if (string.substring(0, index)) {
 			output.push({
 				string: string.substring(0, index),
-				font
+				style: style
 			});
 		}
 
@@ -356,7 +393,7 @@ function extractTags(string: string, tags: {[tag: string]: any}, defaultTag?: an
 		if (string.substring(regex.lastIndex)) {
 			nextCheck.push({
 				string: string.substring(regex.lastIndex),
-				font
+				style: style
 			});
 		}
 
@@ -364,7 +401,7 @@ function extractTags(string: string, tags: {[tag: string]: any}, defaultTag?: an
 		if (text) {
 			nextCheck.push({
 				string: text,
-				font: tags[tag] || font
+				style: tags[tag] || style
 			});
 		}
 
@@ -373,6 +410,10 @@ function extractTags(string: string, tags: {[tag: string]: any}, defaultTag?: an
 	}
 
 	return output;
+}
+
+function wrapText(styledTextLines: {string: string, style: TextStyle}[][], maxWidth: number) {
+	// TODO make this work
 }
 
 // Function that takes a text layer and returns a the text scaled, wrapped as the correct font as a canvas
@@ -403,7 +444,7 @@ function scaleTextLayer(layer: TextLayer) {
 
 	// Build an array of fonts & Strings
 	// This was the most confusing shit ever to work through
-	let stringsWithFonts: {text: string, font: FontStyle}[] = [{
+	let stringsWithFonts: {text: string, font: TextStyle}[] = [{
 		text,
 		font: {
 			font: layer.font,
@@ -412,11 +453,11 @@ function scaleTextLayer(layer: TextLayer) {
 		}
 	}]
 
-	for (const seperatorString in layer.fontReplace) {
-		if (Object.prototype.hasOwnProperty.call(layer.fontReplace, seperatorString)) {
-			const font = layer.fontReplace[seperatorString].font;
-			const fillStyle = layer.fontReplace[seperatorString].fillStyle;
-			const dropShadow = layer.fontReplace[seperatorString].dropShadow == undefined ? layer.dropShadow : layer.fontReplace[seperatorString].dropShadow;
+	for (const seperatorString in layer.styleReplace) {
+		if (Object.prototype.hasOwnProperty.call(layer.styleReplace, seperatorString)) {
+			const font = layer.styleReplace[seperatorString].font;
+			const fillStyle = layer.styleReplace[seperatorString].fillStyle;
+			const dropShadow = layer.styleReplace[seperatorString].dropShadow == undefined ? layer.dropShadow : layer.styleReplace[seperatorString].dropShadow;
 			// Seperator Boundaries
 			const stringWithFontsNew = []
 			const seperatorStart = seperatorString.substring(0, seperatorString.length / 2) //First half of string
