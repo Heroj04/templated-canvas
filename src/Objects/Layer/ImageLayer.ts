@@ -16,6 +16,10 @@ export class ImageLayer extends Layer {
     this.scale = scale
   }
 
+  static fromJSONObject = (jsonObject: any): ImageLayer => {
+    return new ImageLayer(jsonObject.type, jsonObject.description, jsonObject.origin, jsonObject.anchor, jsonObject.size, jsonObject.operations, jsonObject.url, jsonObject.scale)
+  }
+
   draw = async (): Promise<Canvas> => {
     const canvas = createCanvas(this.size.width, this.size.height)
     const context = canvas.getContext('2d')

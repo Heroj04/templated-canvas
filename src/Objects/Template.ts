@@ -1,6 +1,6 @@
 import { type Canvas, createCanvas, registerFont } from 'canvas'
 import type { Font } from './Font'
-import { type Layer, type Size } from './Layer'
+import { type LayerType, type Layer, type Size, FillLayer, TextLayer, ImageLayer, GroupLayer } from './Layer'
 import { type DrawableElement } from './DrawableElement'
 import { isBrowser } from 'browser-or-node'
 
@@ -23,9 +23,26 @@ export class Template implements DrawableElement {
     this.layers = layers
   }
 
-  static fromJSON (jsonString: string): Template {
+  static fromJSONString (jsonString: string): Template {
     const jsonObject = JSON.parse(jsonString)
-    return new Template(jsonObject.name, jsonObject.author, jsonObject.previewImage, jsonObject.size, jsonObject.dpi, jsonObject.fonts, jsonObject.layers)
+    const layers: Layer[] = new Array<Layer>()
+    jsonObject.layers.forEach((layer: any) => {
+      switch (layer.type as LayerType) {
+        case 'fill':
+          layers.push(new FillLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.fillStyle))
+          break
+        case 'image':
+          layers.push(new ImageLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.url, layer.scale))
+          break
+        case 'text':
+          layers.push(new TextLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.text, layer.style, layer.align, layer.wrapText, layer.scaleText, layer.textReplace, layer.styleReplace))
+          break
+        case 'group':
+          layers.push(new GroupLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.layers))
+          break
+      }
+    })
+    return new Template(jsonObject.name, jsonObject.author, jsonObject.previewImage, jsonObject.size, jsonObject.dpi, jsonObject.fonts, layers)
   }
 
   async registerFonts (): Promise<void> {

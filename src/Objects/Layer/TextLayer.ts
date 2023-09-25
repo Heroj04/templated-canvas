@@ -38,6 +38,10 @@ export class TextLayer extends Layer {
     this.styleReplace = styleReplace
   }
 
+  static fromJSONObject = (jsonObject: any): TextLayer => {
+    return new TextLayer(jsonObject.type, jsonObject.description, jsonObject.origin, jsonObject.anchor, jsonObject.size, jsonObject.operations, jsonObject.text, jsonObject.style, jsonObject.align, jsonObject.wrapText, jsonObject.scaleText, jsonObject.textReplace, jsonObject.styleReplace)
+  }
+
   draw = async (): Promise<Canvas> => {
     const canvas = createCanvas(this.size.width, this.size.height)
     const context = canvas.getContext('2d')

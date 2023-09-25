@@ -9,6 +9,10 @@ export class FillLayer extends Layer {
     this.fillStyle = fillStyle
   }
 
+  static fromJSONObject = (jsonObject: any): FillLayer => {
+    return new FillLayer(jsonObject.type, jsonObject.description, jsonObject.origin, jsonObject.anchor, jsonObject.size, jsonObject.operations, jsonObject.fillStyle)
+  }
+
   draw = async (): Promise<Canvas> => {
     const canvas = createCanvas(this.size.width, this.size.height)
     const context = canvas.getContext('2d')
