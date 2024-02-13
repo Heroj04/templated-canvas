@@ -51,7 +51,7 @@ export class Condition {
         }
       }
     } else {
-      // Otherwise its a readl value and just compare to inputs
+      // Otherwise its a real value and just compare to inputs
       results.push(value === input)
     }
 
