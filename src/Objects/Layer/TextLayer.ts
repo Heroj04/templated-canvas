@@ -167,7 +167,9 @@ export class TextLayer extends Layer {
         })
         // update veritcal position
         y += line.metrics.maxDescent
+        // TODO - Add line spacing
       });
+      // TODO - Add paragraph spacing
     });
 
     return canvas
