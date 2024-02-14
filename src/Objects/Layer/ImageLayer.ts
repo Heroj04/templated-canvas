@@ -24,7 +24,7 @@ export class ImageLayer extends Layer {
     const canvas = createCanvas(this.size.width, this.size.height)
     const context = canvas.getContext('2d')
 
-    const image = await loadImage(this.url)
+    const image = await loadImage(this.url.toString())
     const ratio = image.width / image.height
 
     let x, y, width, height
