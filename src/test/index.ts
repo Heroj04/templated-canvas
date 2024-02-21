@@ -3,7 +3,8 @@ console.log('RUNNING TESTS')
 
 void Promise.all([
   require('./blank_template').test(),
-  require('./fill').test()
+  require('./fill').test(),
+  require('./text').test()
 ])
 
 // TODO - Write Proper Tests
