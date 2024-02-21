@@ -76,11 +76,10 @@ export class TextLayer extends Layer {
     // Seperate paragraphs and line breaks
     const paragraphs = new Array<Paragraph>({ metrics: { height: 0, width: 0 }, lines: new Array<Line>({ metrics: { maxAscent: 0, maxDescent: 0, width: 0 }, text: new Array<StyledString>() }) })
     styledText.forEach(styledTextItem => {
-
       // Split the text on double new lines for paragraphs
-      const paragraphSplits = styledTextItem.string.split("\n\n")
+      const paragraphSplits = styledTextItem.string.split('\n\n')
       for (let paragraphTextIndex = 0; paragraphTextIndex < paragraphSplits.length; paragraphTextIndex++) {
-        const paragraphText = paragraphSplits[paragraphTextIndex];
+        const paragraphText = paragraphSplits[paragraphTextIndex]
 
         // If this is not the fist index create a new paragraph with an empty line
         if (paragraphTextIndex > 0) {
@@ -89,24 +88,25 @@ export class TextLayer extends Layer {
         const currentParagraph = paragraphs[paragraphs.length - 1]
 
         // Split the text on new lines as new lines
-        const lineSplits = paragraphText.split("\n")
+        const lineSplits = paragraphText.split('\n')
         for (let lineTextIndex = 0; lineTextIndex < lineSplits.length; lineTextIndex++) {
-          const lineText = lineSplits[lineTextIndex];
+          const lineText = lineSplits[lineTextIndex]
 
           // If this is not the first index create a new line
           if (lineTextIndex > 0) {
             currentParagraph.lines.push({ metrics: { maxAscent: 0, maxDescent: 0, width: 0 }, text: new Array<StyledString>() })
           }
           const currentLine = currentParagraph.lines[currentParagraph.lines.length - 1]
-          currentLine.text.push({string: lineText, style: styledTextItem.style})
+          currentLine.text.push({ string: lineText, style: styledTextItem.style })
+          const styledLineText = currentLine.text[currentLine.text.length - 1]
 
           // Calculate new line metrics
           TextLayer.setContextTextStyle(context, styledTextItem.style)
-          styledTextItem.metrics = context.measureText(lineText)
+          styledLineText.metrics = context.measureText(lineText)
 
-          currentLine.metrics.maxAscent = Math.max(currentLine.metrics.maxAscent, styledTextItem.metrics.fontBoundingBoxAscent)
-          currentLine.metrics.maxDescent = Math.max(currentLine.metrics.maxDescent, styledTextItem.metrics.fontBoundingBoxDescent)
-          currentLine.metrics.width += styledTextItem.metrics.width
+          currentLine.metrics.maxAscent = Math.max(currentLine.metrics.maxAscent, styledLineText.metrics.actualBoundingBoxAscent)
+          currentLine.metrics.maxDescent = Math.max(currentLine.metrics.maxDescent, styledLineText.metrics.actualBoundingBoxDescent)
+          currentLine.metrics.width += styledLineText.metrics.width
         }
 
         // Calculate paragrpah metrics
@@ -114,9 +114,9 @@ export class TextLayer extends Layer {
           currentParagraph.metrics.height += (line.metrics.maxAscent + line.metrics.maxDescent)
           currentParagraph.metrics.width = Math.max(currentParagraph.metrics.width, line.metrics.width)
           // TODO - Add height for line spacing and paragraph spacing
-        });
+        })
       }
-    });
+    })
 
     // TODO - Word Wrapping/Scaling
 
@@ -168,9 +168,9 @@ export class TextLayer extends Layer {
         // update veritcal position
         y += line.metrics.maxDescent
         // TODO - Add line spacing
-      });
+      })
       // TODO - Add paragraph spacing
-    });
+    })
 
     return canvas
   }
