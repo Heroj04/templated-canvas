@@ -3,8 +3,11 @@ export class Condition {
   or: Condition[] | undefined
   not: Condition | undefined
 
-  constructor() {
-
+  constructor (values?: Map<string, unknown>, or?: Condition[], not?: Condition) {
+    this.values = values
+    this.or = or
+    this.not = not
+    // TODO - condition constructor
   }
 
   public processConditions (inputs: any): boolean {
@@ -47,7 +50,7 @@ export class Condition {
       for (const operator in value) {
         if (!Object.prototype.hasOwnProperty.call(value, operator)) continue
         if (typeof operatorFunctions[operator] === 'function') {
-          results.push(operatorFunctions[operator](value[operator]))
+          results.push(operatorFunctions[operator](value[operator as keyof typeof value]))
         }
       }
     } else {
