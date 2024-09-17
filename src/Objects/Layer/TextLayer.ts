@@ -105,8 +105,8 @@ export class TextLayer extends Layer {
           styledLineText.metrics = context.measureText(lineText)
 
           // TODO - Change to fontBoundingBox (No Support in node-canvas see https://github.com/Automattic/node-canvas/issues/1940)
-          currentLine.metrics.maxAscent = Math.max(currentLine.metrics.maxAscent, styledLineText.metrics.actualBoundingBoxAscent)
-          currentLine.metrics.maxDescent = Math.max(currentLine.metrics.maxDescent, styledLineText.metrics.actualBoundingBoxDescent)
+          currentLine.metrics.maxAscent = Math.max(currentLine.metrics.maxAscent, styledLineText.metrics.emHeightAscent)
+          currentLine.metrics.maxDescent = Math.max(currentLine.metrics.maxDescent, styledLineText.metrics.emHeightDescent)
           currentLine.metrics.width += styledLineText.metrics.width
         }
 
