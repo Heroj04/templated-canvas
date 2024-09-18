@@ -1,4 +1,4 @@
-import { type Canvas, type CanvasRenderingContext2D, createCanvas } from 'canvas'
+import { type Canvas, type CanvasRenderingContext2D, createCanvas, TextMetrics } from 'canvas'
 import { Layer, type LayerType, type FillStyle, type Anchor, type Point, type Size } from './Layer'
 
 export interface TextStyle {
@@ -12,10 +12,17 @@ export interface StyleReplace {
   style: TextStyle
 }
 
+// Temporary fix to add emHeight types to TextMetrics interface until node-canvas is updated
+// TODO - Update node-canvas and remove this
+interface fixedTextMetrics extends TextMetrics {
+  emHeightAscent: number
+  emHeightDescent: number
+}
+
 export interface StyledString {
   string: string
   style: TextStyle
-  metrics?: TextMetrics
+  metrics?: fixedTextMetrics
 }
 
 export interface LineMetrics {
