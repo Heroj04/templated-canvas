@@ -7,7 +7,7 @@ module.exports = {
 
     const layers = [
       new FillLayer('fill', 'Background', { x: 0, y: 0 }, { vertical: 'Top', horizontal: 'Left' }, { width: 100, height: 100 }, ['source-over'], 'white'),
-      new ImageLayer('image', 'Test PNG', { x: 0, y: 0 }, { vertical: 'Top', horizontal: 'Left' }, { width: 75, height: 75 }, ['source-over'], new URL('https://avatars.githubusercontent.com/u/9601343?v=4'), 'fit')
+      new ImageLayer('image', 'Test PNG', { x: 0, y: 0 }, { vertical: 'Top', horizontal: 'Left' }, { width: 75, height: 75 }, ['source-over'], 'https://avatars.githubusercontent.com/u/9601343?v=4', 'fit')
     ]
 
     const template = new Template('Test Image Template', 'Mr Hero', new URL('https://example.com'), { width: 100, height: 100 }, 300, [], layers)

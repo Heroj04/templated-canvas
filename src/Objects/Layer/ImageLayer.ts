@@ -7,10 +7,10 @@ export type ScaleType =
   | 'stretch'
 
 export class ImageLayer extends Layer {
-  url: URL
+  url: string
   scale: ScaleType
 
-  constructor (type: LayerType, description: string, origin: Point, anchor: Anchor, size: Size, operations: GlobalCompositeOperation[], url: URL, scale: ScaleType) {
+  constructor (type: LayerType, description: string, origin: Point, anchor: Anchor, size: Size, operations: GlobalCompositeOperation[], url: string, scale: ScaleType) {
     super(type, description, origin, anchor, size, operations)
     this.url = url
     this.scale = scale
@@ -24,7 +24,7 @@ export class ImageLayer extends Layer {
     const canvas = createCanvas(this.size.width, this.size.height)
     const context = canvas.getContext('2d')
 
-    const image = await loadImage(this.url.toString())
+    const image = await loadImage(this.url)
     const ratio = image.width / image.height
 
     let x, y, width, height
