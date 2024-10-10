@@ -109,7 +109,8 @@ export class TextLayer extends Layer {
 
           // Calculate new line metrics
           TextLayer.setContextTextStyle(context, styledTextItem.style)
-          styledLineText.metrics = context.measureText(lineText)
+          // TODO - This is temporary until node-canvas supports emHeightAscent/Descent types
+          styledLineText.metrics = context.measureText(lineText) as fixedTextMetrics
 
           // TODO - Change to fontBoundingBox (No Support in node-canvas see https://github.com/Automattic/node-canvas/issues/1940)
           currentLine.metrics.maxAscent = Math.max(currentLine.metrics.maxAscent, styledLineText.metrics.emHeightAscent)
