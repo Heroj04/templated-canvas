@@ -1,13 +1,10 @@
 {
-	"compilerOptions": {
-		"target": "ES2021",
-		"module": "esnext",
-		"declaration": true,
-		"outDir": "dist",
-		"strict": true,
-		"moduleResolution": "node"
-	},
+	"extends": "@tsconfig/recommended/tsconfig.json",
 	"include": [
 		"src"
-	]
+	],
+	"compilerOptions": {
+		"outDir": "dist",
+		"declaration": true
+	}
 }
