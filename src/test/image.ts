@@ -6,17 +6,17 @@ module.exports = {
     console.log('TEST[image] Started')
 
     const layers = [
-      new FillLayer('fill', 'Background', { x: 0, y: 0 }, { vertical: 'Top', horizontal: 'Left' }, { width: 100, height: 100 }, ['source-over'], 'white'),
-      new ImageLayer('image', 'Test PNG', { x: 0, y: 0 }, { vertical: 'Top', horizontal: 'Left' }, { width: 75, height: 75 }, ['source-over'], 'https://avatars.githubusercontent.com/u/9601343?v=4', 'fit')
+      new ImageLayer('image', 'Test PNG', { x: 0, y: 0 }, { vertical: 'Top', horizontal: 'Left' }, { width: 100, height: 100 }, ['source-over'], 'test/test_image_1.png', 'fit'),
+      new ImageLayer('image', 'Test PNG', { x: 0, y: 0 }, { vertical: 'Top', horizontal: 'Left' }, { width: 100, height: 100 }, ['source-over'], 'test/test_image_2.png', 'fit')
     ]
 
     const template = new Template('Test Image Template', 'Mr Hero', new URL('https://example.com'), { width: 100, height: 100 }, 300, [], layers)
-    return await mkdir('dist/test/output', { recursive: true })
+    return await mkdir('test/output', { recursive: true })
       .then(async () => {
         return await template.draw()
       })
       .then(async canvas => {
-        await writeFile('dist/test/output/image.png', canvas.toBuffer())
+        await writeFile('test/output/image.png', canvas.toBuffer())
       })
       .then(async () => {
         console.log('TEST[image] Passed')

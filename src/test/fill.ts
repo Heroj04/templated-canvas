@@ -12,12 +12,12 @@ module.exports = {
     ]
 
     const template = new Template('Test Fill Template', 'Mr Hero', new URL('https://example.com'), { width: 100, height: 100 }, 300, [], layers)
-    return await mkdir('dist/test/output', { recursive: true })
+    return await mkdir('test/output', { recursive: true })
       .then(async () => {
         return await template.draw()
       })
       .then(async canvas => {
-        await writeFile('dist/test/output/fill.png', canvas.toBuffer())
+        await writeFile('test/output/fill.png', canvas.toBuffer())
       })
       .then(async () => {
         console.log('TEST[fill] Passed')

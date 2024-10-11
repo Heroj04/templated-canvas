@@ -38,3 +38,6 @@ src/
 
 # Output of 'npm pack'
 *.tgz
+
+# Test build
+dist/test/
