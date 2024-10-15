@@ -14,7 +14,7 @@ export interface StyleReplace {
 
 // Temporary fix to add emHeight types to TextMetrics interface until node-canvas is updated
 // TODO - Update node-canvas and remove this
-interface fixedTextMetrics extends TextMetrics {
+export interface fixedTextMetrics extends TextMetrics {
   emHeightAscent: number
   emHeightDescent: number
 }
@@ -25,23 +25,23 @@ export interface StyledString {
   metrics?: fixedTextMetrics
 }
 
-export interface LineMetrics {
+interface LineMetrics {
   maxAscent: number
   maxDescent: number
   width: number
 }
 
-export interface ParagraphMetrics {
+interface ParagraphMetrics {
   height: number
   width: number
 }
 
-export interface Line {
+interface Line {
   text: StyledString[]
   metrics: LineMetrics
 }
 
-export interface Paragraph {
+interface Paragraph {
   metrics: ParagraphMetrics
   lines: Line[]
 }
