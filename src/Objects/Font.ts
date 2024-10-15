@@ -1,7 +1,7 @@
 export interface FontFace {
   family: string
-  weight: string | undefined
-  style: string | undefined
+  weight?: string
+  style?: string
 }
 
 export class Font {
