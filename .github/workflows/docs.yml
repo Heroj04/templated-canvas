@@ -1,0 +1,25 @@
+name: Generate docs and push to Github Pages
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and Push Docs
+    steps:
+      - name: git-checkout
+        uses: actions/checkout@v4
+
+      - name: Install all dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build-docs
+    
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
