@@ -1,23 +1,28 @@
 import { type Canvas, createCanvas, loadImage } from 'canvas'
-import { type Anchor, Layer, type Point, type Size, type LayerType } from './Layer'
+import { Layer, layerProperties } from './Layer'
 
 export type ScaleType =
   | 'fill'
   | 'fit'
   | 'stretch'
 
+export interface ImageLayerProperties extends layerProperties {
+  url: string
+  scale?: ScaleType
+}
+
 export class ImageLayer extends Layer {
   url: string
   scale: ScaleType
 
-  constructor (type: LayerType, description: string, origin: Point, anchor: Anchor, size: Size, operations: GlobalCompositeOperation[], url: string, scale: ScaleType) {
-    super(type, description, origin, anchor, size, operations)
-    this.url = url
-    this.scale = scale
+  constructor (properties: ImageLayerProperties) {
+    super(properties)
+    this.url = properties.url
+    this.scale = properties.scale ?? 'fill'
   }
 
   static fromJSONObject = (jsonObject: any): ImageLayer => {
-    return new ImageLayer(jsonObject.type, jsonObject.description, jsonObject.origin, jsonObject.anchor, jsonObject.size, jsonObject.operations, jsonObject.url, jsonObject.scale)
+    return new ImageLayer(jsonObject)
   }
 
   draw = async (): Promise<Canvas> => {

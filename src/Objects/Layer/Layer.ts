@@ -1,12 +1,6 @@
 import { type Canvas } from 'canvas'
 import { type DrawableElement } from '../DrawableElement'
 
-export type LayerType =
-  | 'group'
-  | 'text'
-  | 'image'
-  | 'fill'
-
 export type FillStyle =
   | string
   | CanvasGradient
@@ -27,21 +21,24 @@ export interface Size {
   height: number
 }
 
+export interface layerProperties {
+  origin?: Point
+  anchor?: Anchor
+  size: Size
+  operations?: GlobalCompositeOperation[]
+}
+
 export abstract class Layer implements DrawableElement {
-  type: LayerType
-  description: string
   origin: Point
   anchor: Anchor
   size: Size
   operations: GlobalCompositeOperation[]
 
-  constructor (type: LayerType, description: string, origin: Point, anchor: Anchor, size: Size, operations: GlobalCompositeOperation[]) {
-    this.type = type
-    this.description = description
-    this.origin = origin
-    this.anchor = anchor
-    this.size = size
-    this.operations = operations
+  constructor (properties: layerProperties) {
+    this.origin = properties.origin ?? { x: 0, y: 0 }
+    this.anchor = properties.anchor ?? { vertical: 'Top', horizontal: 'Left' }
+    this.size = properties.size
+    this.operations = properties.operations ?? ['source-over']
   }
 
   abstract draw: () => Promise<Canvas>

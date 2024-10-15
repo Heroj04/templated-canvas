@@ -1,5 +1,5 @@
 import { type Canvas, type CanvasRenderingContext2D, createCanvas, TextMetrics } from 'canvas'
-import { Layer, type LayerType, type FillStyle, type Anchor, type Point, type Size } from './Layer'
+import { Layer, type FillStyle, type Anchor, layerProperties } from './Layer'
 
 export interface TextStyle {
   font: string
@@ -46,6 +46,16 @@ export interface Paragraph {
   lines: Line[]
 }
 
+export interface TextLayerProperties extends layerProperties {
+  text: string
+  style?: TextStyle
+  align?: Anchor
+  wrapText?: boolean
+  scaleText?: boolean
+  textReplace?: Map<string, string>
+  styleReplace?: StyleReplace[]
+}
+
 export class TextLayer extends Layer {
   text: string
   style: TextStyle
@@ -55,19 +65,19 @@ export class TextLayer extends Layer {
   textReplace: Map<string, string>
   styleReplace: StyleReplace[]
 
-  constructor (type: LayerType, description: string, origin: Point, anchor: Anchor, size: Size, operations: GlobalCompositeOperation[], text: string, style: TextStyle, align: Anchor, wrapText: boolean, scaleText: boolean, textReplace: Map<string, string>, styleReplace: StyleReplace[]) {
-    super(type, description, origin, anchor, size, operations)
-    this.text = text
-    this.style = style
-    this.align = align
-    this.wrapText = wrapText
-    this.scaleText = scaleText
-    this.textReplace = textReplace
-    this.styleReplace = styleReplace
+  constructor (properties: TextLayerProperties) {
+    super(properties)
+    this.text = properties.text
+    this.style = properties.style ?? { font: 'Regular 10px Sans-Serif', fillStyle: 'black' }
+    this.align = properties.align ?? { vertical: 'Top', horizontal: 'Left' }
+    this.wrapText = properties.wrapText ?? false
+    this.scaleText = properties.scaleText ?? false
+    this.textReplace = properties.textReplace ?? new Map<string, string>()
+    this.styleReplace = properties.styleReplace ?? []
   }
 
   static fromJSONObject = (jsonObject: any): TextLayer => {
-    return new TextLayer(jsonObject.type, jsonObject.description, jsonObject.origin, jsonObject.anchor, jsonObject.size, jsonObject.operations, jsonObject.text, jsonObject.style, jsonObject.align, jsonObject.wrapText, jsonObject.scaleText, jsonObject.textReplace, jsonObject.styleReplace)
+    return new TextLayer(jsonObject)
   }
 
   draw = async (): Promise<Canvas> => {
