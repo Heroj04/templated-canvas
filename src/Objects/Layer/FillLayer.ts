@@ -1,16 +1,20 @@
 import { type Canvas, createCanvas } from 'canvas'
-import { Layer, type LayerType, type FillStyle, type Point, type Anchor, type Size } from './Layer'
+import { Layer, type FillStyle, layerProperties } from './Layer'
+
+export interface FillLayerProperties extends layerProperties {
+  fillStyle?: FillStyle
+}
 
 export class FillLayer extends Layer {
   fillStyle: FillStyle
 
-  constructor (type: LayerType, description: string, origin: Point, anchor: Anchor, size: Size, operations: GlobalCompositeOperation[], fillStyle: FillStyle) {
-    super(type, description, origin, anchor, size, operations)
-    this.fillStyle = fillStyle
+  constructor (properties: FillLayerProperties) {
+    super(properties)
+    this.fillStyle = properties.fillStyle ?? 'white'
   }
 
   static fromJSONObject = (jsonObject: any): FillLayer => {
-    return new FillLayer(jsonObject.type, jsonObject.description, jsonObject.origin, jsonObject.anchor, jsonObject.size, jsonObject.operations, jsonObject.fillStyle)
+    return new FillLayer(jsonObject)
   }
 
   draw = async (): Promise<Canvas> => {

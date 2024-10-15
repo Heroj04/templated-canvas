@@ -1,8 +1,14 @@
 import { type Canvas, createCanvas, registerFont } from 'canvas'
 import type { Font } from './Font'
-import { type LayerType, type Layer, type Size, FillLayer, TextLayer, ImageLayer, GroupLayer } from './Layer'
+import { type Layer, type Size, FillLayer, TextLayer, ImageLayer, GroupLayer } from './Layer'
 import { type DrawableElement } from './DrawableElement'
 import { isBrowser } from 'browser-or-node'
+
+export type LayerType =
+  | 'group'
+  | 'text'
+  | 'image'
+  | 'fill'
 
 export class Template implements DrawableElement {
   name: string
@@ -29,16 +35,16 @@ export class Template implements DrawableElement {
     jsonObject.layers.forEach((layer: any) => {
       switch (layer.type as LayerType) {
         case 'fill':
-          layers.push(new FillLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.fillStyle))
+          layers.push(new FillLayer(layer))
           break
         case 'image':
-          layers.push(new ImageLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.url, layer.scale))
+          layers.push(new ImageLayer(layer))
           break
         case 'text':
-          layers.push(new TextLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.text, layer.style, layer.align, layer.wrapText, layer.scaleText, layer.textReplace, layer.styleReplace))
+          layers.push(new TextLayer(layer))
           break
         case 'group':
-          layers.push(new GroupLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.layers))
+          layers.push(new GroupLayer(layer))
           break
       }
     })

@@ -1,16 +1,20 @@
-import { type Anchor, Layer, type Point, type Size, type LayerType } from './Layer'
-import { Template } from '../Template'
+import { Layer, layerProperties } from './Layer'
+import { Template, LayerType } from '../Template'
 import { type Canvas } from 'canvas'
 import { FillLayer } from './FillLayer'
 import { ImageLayer } from './ImageLayer'
 import { TextLayer } from './TextLayer'
 
+export interface GroupLayerProperties extends layerProperties {
+  layers: Layer[]
+}
+
 export class GroupLayer extends Layer {
   layers: Layer[]
 
-  constructor (type: LayerType, description: string, origin: Point, anchor: Anchor, size: Size, operations: GlobalCompositeOperation[], layers: Layer[]) {
-    super(type, description, origin, anchor, size, operations)
-    this.layers = layers
+  constructor (properties: GroupLayerProperties) {
+    super(properties)
+    this.layers = properties.layers
   }
 
   static fromJSONObject = (jsonObject: any): GroupLayer => {
@@ -18,20 +22,20 @@ export class GroupLayer extends Layer {
     jsonObject.layers.forEach((layer: any) => {
       switch (layer.type as LayerType) {
         case 'fill':
-          layers.push(new FillLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.fillStyle))
+          layers.push(new FillLayer(layer))
           break
         case 'image':
-          layers.push(new ImageLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.url, layer.scale))
+          layers.push(new ImageLayer(layer))
           break
         case 'text':
-          layers.push(new TextLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.text, layer.style, layer.align, layer.wrapText, layer.scaleText, layer.textReplace, layer.styleReplace))
+          layers.push(new TextLayer(layer))
           break
         case 'group':
-          layers.push(new GroupLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.layers))
+          layers.push(new GroupLayer(layer))
           break
       }
     })
-    return new GroupLayer(jsonObject.type, jsonObject.description, jsonObject.origin, jsonObject.anchor, jsonObject.size, jsonObject.operations, layers)
+    return new GroupLayer(jsonObject)
   }
 
   draw = async (): Promise<Canvas> => {
