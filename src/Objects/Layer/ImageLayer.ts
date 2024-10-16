@@ -1,30 +1,57 @@
 import { type Canvas, createCanvas, loadImage } from 'canvas'
 import { Layer, layerProperties } from './Layer'
 
+/**
+ * A basic enum with the image fill types  
+ * - `fill`: Sets the image to fill the entire canvas (May cut off parts of the image)
+ * - `fit`: Sets the image to fit into the canvas (May include whitespace letter/pillar boxing)
+ * - `stretch`: Sets the image to the same dimensions as the canvas (May casue the image to become distorted)
+ */
 export type ScaleType =
   | 'fill'
   | 'fit'
   | 'stretch'
 
+/**
+ * The layer properties used for the constructor
+ */
 export interface ImageLayerProperties extends layerProperties {
   url: string
+  /** @defaultValue `'fill'` */
   scale?: ScaleType
 }
 
+/**
+ * A class representing an Image Layer
+ */
 export class ImageLayer extends Layer {
   url: string
   scale: ScaleType
 
+  /**
+   * Create an ImageLayer object
+   * @param properties The properties of the Image Layer
+   */
   constructor (properties: ImageLayerProperties) {
     super(properties)
     this.url = properties.url
     this.scale = properties.scale ?? 'fill'
   }
 
+  /**
+   * Create an ImageLayer from a JSON Object
+   * @param jsonObject A JSON Object representing an ImageLayer
+   * @returns An ImageLayer
+   */
   static fromJSONObject = (jsonObject: any): ImageLayer => {
+    if (jsonObject.type !== 'image') throw new Error('JSON Object is not an "image" layer')
     return new ImageLayer(jsonObject)
   }
 
+  /**
+   * Draw the Image Layer to a canvas
+   * @returns A canvas with the image drawn to it
+   */
   draw = async (): Promise<Canvas> => {
     const canvas = createCanvas(this.size.width, this.size.height)
     const context = canvas.getContext('2d')
