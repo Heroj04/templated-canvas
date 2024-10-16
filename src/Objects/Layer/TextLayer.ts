@@ -120,6 +120,7 @@ export class TextLayer extends Layer {
    * @returns A TextLayer
    */
   static fromJSONObject = (jsonObject: any): TextLayer => {
+    if (jsonObject.type !== 'text') throw new Error('JSON Object is not a "text" layer')
     return new TextLayer(jsonObject)
   }
 
@@ -261,7 +262,7 @@ export class TextLayer extends Layer {
    * Get all text strings of this layer after styling
    * @returns An array of StyledStrings
    */
-  getReplacedStyles = (text: string): StyledString[] => {
+  getReplacedStyles = (): StyledString[] => {
     return TextLayer.replaceTextStyles(this.text, this.style, this.styleReplace)
   }
 

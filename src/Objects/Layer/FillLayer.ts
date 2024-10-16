@@ -29,6 +29,7 @@ export class FillLayer extends Layer {
    * @returns A FillLayer
    */
   static fromJSONObject = (jsonObject: any): FillLayer => {
+    if (jsonObject.type !== 'fill') throw new Error('JSON Object is not a "fill" layer')
     return new FillLayer(jsonObject)
   }
 

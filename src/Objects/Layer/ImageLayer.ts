@@ -44,6 +44,7 @@ export class ImageLayer extends Layer {
    * @returns An ImageLayer
    */
   static fromJSONObject = (jsonObject: any): ImageLayer => {
+    if (jsonObject.type !== 'image') throw new Error('JSON Object is not an "image" layer')
     return new ImageLayer(jsonObject)
   }
 

@@ -34,6 +34,7 @@ export class GroupLayer extends Layer {
    * @returns A GroupLayer
    */
   static fromJSONObject = (jsonObject: any): GroupLayer => {
+    if (jsonObject.type !== 'group') throw new Error('JSON Object is not a "group" layer')
     const layers: Layer[] = new Array<Layer>()
     jsonObject.layers.forEach((layer: any) => {
       switch (layer.type as LayerType) {
