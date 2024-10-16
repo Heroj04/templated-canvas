@@ -5,19 +5,36 @@ import { FillLayer } from './FillLayer'
 import { ImageLayer } from './ImageLayer'
 import { TextLayer } from './TextLayer'
 
+/**
+ * The properties of the Group Layer used in the constructor
+ */
 export interface GroupLayerProperties extends layerProperties {
   layers: Layer[]
 }
 
+/**
+ * A class representing a Group Layer
+ */
 export class GroupLayer extends Layer {
   layers: Layer[]
 
+  /**
+   * Create a GroupLayer object
+   * @param properties The properties of the GroupLayer
+   */
   constructor (properties: GroupLayerProperties) {
     super(properties)
     this.layers = properties.layers
   }
 
+  /**
+   * Create a GroupLayer from a JSON Object  
+   * Also creates all layers in the `jsonObject.layers` key
+   * @param jsonObject A JSON Object representing a GroupLayer
+   * @returns A GroupLayer
+   */
   static fromJSONObject = (jsonObject: any): GroupLayer => {
+    if (jsonObject.type !== 'group') throw new Error('JSON Object is not a "group" layer')
     const layers: Layer[] = new Array<Layer>()
     jsonObject.layers.forEach((layer: any) => {
       switch (layer.type as LayerType) {
@@ -38,6 +55,10 @@ export class GroupLayer extends Layer {
     return new GroupLayer(jsonObject)
   }
 
+  /**
+   * Draw the group layer including all underlying layers
+   * @returns A canvas with the group layer drawn to it
+   */
   draw = async (): Promise<Canvas> => {
     return await Template.drawLayerGroup(this.layers, this.size)
   }

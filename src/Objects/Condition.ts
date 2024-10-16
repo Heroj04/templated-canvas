@@ -1,8 +1,17 @@
+/**
+ * A class representing a condition to be evaluated against a set of inputs
+ */
 export class Condition {
-  values: Map<string, unknown> | undefined
-  or: Condition[] | undefined
-  not: Condition | undefined
+  values?: Map<string, unknown>
+  or?: Condition[]
+  not?: Condition
 
+  /**
+   * Create a Condition Object
+   * @param values A map of Key Value Pairs as <InputName, EqualValue> or <InputName, {Operator: Value}>
+   * @param or An array of conditions whose final value will be true if any containing conditions are true
+   * @param not A condition whose result will be inverted
+   */
   constructor (values?: Map<string, unknown>, or?: Condition[], not?: Condition) {
     this.values = values
     this.or = or
@@ -10,6 +19,11 @@ export class Condition {
     // TODO - condition constructor
   }
 
+  /**
+   * Process the conditons of this object against a set of inputs
+   * @param inputs The inputs to evaluate the condition against
+   * @returns True if the condition passes
+   */
   public processConditions (inputs: any): boolean {
     // Get results of values
     const valueResults: boolean[] = []
@@ -31,6 +45,12 @@ export class Condition {
     return valueResult && orResult && notResult
   }
 
+  /**
+   * Test a single condition against a single condition value
+   * @param value The value of the condition
+   * @param input The input to compare against
+   * @returns True if the value matches the input value or passess the operation
+   */
   static testInputValue (value: unknown, input: unknown): boolean {
     // Create a results array
     const results: boolean[] = []
