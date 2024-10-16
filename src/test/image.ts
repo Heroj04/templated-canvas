@@ -6,8 +6,8 @@ module.exports = {
     console.log('TEST[image] Started')
 
     const layers = [
-      new ImageLayer('image', 'Test PNG', { x: 0, y: 0 }, { vertical: 'Top', horizontal: 'Left' }, { width: 100, height: 100 }, ['source-over'], 'test/test_image_1.png', 'fit'),
-      new ImageLayer('image', 'Test PNG', { x: 0, y: 0 }, { vertical: 'Top', horizontal: 'Left' }, { width: 100, height: 100 }, ['source-over'], 'test/test_image_2.png', 'fit')
+      new ImageLayer({ size: { width: 100, height: 100 }, url: 'test/test_image_1.png' }), // Under Image
+      new ImageLayer({ size: { width: 100, height: 100 }, url: 'test/test_image_2.png' }) // Over Image
     ]
 
     const template = new Template('Test Image Template', 'Mr Hero', new URL('https://example.com'), { width: 100, height: 100 }, 300, [], layers)

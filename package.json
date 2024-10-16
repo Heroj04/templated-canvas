@@ -1,13 +1,14 @@
 {
   "name": "templated-canvas",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Build images using JSON templates on the Canvas API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "npx tsc --sourcemap && node ./dist/test/index.js",
     "build": "npx tsc -p ./tsconfig.build.json",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "build-docs": "npx typedoc ./src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -33,6 +34,7 @@
     "eslint-plugin-import": "^2.28.1",
     "eslint-plugin-n": "^16.1.0",
     "eslint-plugin-promise": "^6.1.1",
+    "typedoc": "^0.26.9",
     "typescript": "^5.2.2"
   }
 }

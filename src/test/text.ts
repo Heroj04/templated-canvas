@@ -6,8 +6,8 @@ module.exports = {
     console.log('TEST[text] Started')
 
     const layers = [
-      new TextLayer('text', 'Test1', { x: 0, y: 0 }, { vertical: 'Top', horizontal: 'Left' }, { width: 100, height: 100 }, ['source-over'], 'Testing', { fillStyle: 'white', font: 'Bold 20px Sans' }, { vertical: 'Middle', horizontal: 'Center' }, false, false, new Map(), []),
-      new TextLayer('text', 'Test1', { x: 0, y: 0 }, { vertical: 'Top', horizontal: 'Left' }, { width: 100, height: 100 }, ['source-over'], 'abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ', { fillStyle: 'black', font: 'Regular 10px Serif' }, { vertical: 'Top', horizontal: 'Left' }, false, false, new Map(), [])
+      new TextLayer({ size: { width: 100, height: 100 }, text: 'Testing', style: { fillStyle: 'white', font: 'Bold 20px Serif' }, align: { vertical: 'Middle', horizontal: 'Center' } }), // Center Static
+      new TextLayer({ size: { width: 100, height: 100 }, text: 'abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ', wrapText: true }) // Top Wrapped
     ]
 
     const template = new Template('Test Text Template', 'Mr Hero', new URL('https://example.com'), { width: 100, height: 100 }, 300, [], layers)

@@ -1,9 +1,21 @@
 import { type Canvas, createCanvas, registerFont } from 'canvas'
 import type { Font } from './Font'
-import { type LayerType, type Layer, type Size, FillLayer, TextLayer, ImageLayer, GroupLayer } from './Layer'
+import { type Layer, type Size, FillLayer, TextLayer, ImageLayer, GroupLayer } from './Layer'
 import { type DrawableElement } from './DrawableElement'
 import { isBrowser } from 'browser-or-node'
+/**
+ * A basic enum with string representations of each layer type.
+ * Used for creating layers from JSON.
+ */
+export type LayerType =
+  | 'group'
+  | 'text'
+  | 'image'
+  | 'fill'
 
+/**
+ * A class representing an exportable image template
+ */
 export class Template implements DrawableElement {
   name: string
   author: string
@@ -13,6 +25,16 @@ export class Template implements DrawableElement {
   fonts: Font[]
   layers: Layer[]
 
+  /**
+   * Create a new template
+   * @param name A descriptive name of the template
+   * @param author The name of the template author
+   * @param previewImage A URL or path to a preview image
+   * @param size The height and width of the final generated image
+   * @param dpi The DPI to the exported image is saved with
+   * @param fonts An array of fonts to be loaded before generating the template
+   * @param layers An array of layers to be drawn
+   */
   constructor (name: string, author: string, previewImage: URL, size: Size, dpi: number, fonts: Font[], layers: Layer[]) {
     this.name = name
     this.author = author
@@ -23,28 +45,36 @@ export class Template implements DrawableElement {
     this.layers = layers
   }
 
+  /**
+   * Create a template from a json string.
+   * @param jsonString a string representing a json object
+   * @returns a template
+   */
   static fromJSONString (jsonString: string): Template {
     const jsonObject = JSON.parse(jsonString)
     const layers: Layer[] = new Array<Layer>()
     jsonObject.layers.forEach((layer: any) => {
       switch (layer.type as LayerType) {
         case 'fill':
-          layers.push(new FillLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.fillStyle))
+          layers.push(new FillLayer(layer))
           break
         case 'image':
-          layers.push(new ImageLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.url, layer.scale))
+          layers.push(new ImageLayer(layer))
           break
         case 'text':
-          layers.push(new TextLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.text, layer.style, layer.align, layer.wrapText, layer.scaleText, layer.textReplace, layer.styleReplace))
+          layers.push(new TextLayer(layer))
           break
         case 'group':
-          layers.push(new GroupLayer(layer.type, layer.description, layer.origin, layer.anchor, layer.size, layer.operations, layer.layers))
+          layers.push(new GroupLayer(layer))
           break
       }
     })
     return new Template(jsonObject.name, jsonObject.author, jsonObject.previewImage, jsonObject.size, jsonObject.dpi, jsonObject.fonts, layers)
   }
 
+  /**
+   * Registers all fonts of current template on the system to be drawn.
+   */
   async registerFonts (): Promise<void> {
     if (isBrowser) {
       for await (const font of this.fonts) {
@@ -65,6 +95,12 @@ export class Template implements DrawableElement {
     return await Template.drawLayerGroup(this.layers, this.size)
   }
 
+  /**
+   * Draw a group of layers and return the result as a canvas
+   * @param layers An array of layers to be drawn
+   * @param size The size of the overall group of layers
+   * @returns A canvas witht he layers drawn to it
+   */
   static drawLayerGroup = async (layers: Layer[], size: Size): Promise<Canvas> => {
     const canvas = createCanvas(size.width, size.height)
     const context = canvas.getContext('2d')
