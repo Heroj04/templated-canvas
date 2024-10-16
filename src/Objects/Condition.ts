@@ -2,9 +2,9 @@
  * A class representing a condition to be evaluated against a set of inputs
  */
 export class Condition {
-  values: Map<string, unknown> | undefined
-  or: Condition[] | undefined
-  not: Condition | undefined
+  values?: Map<string, unknown>
+  or?: Condition[]
+  not?: Condition
 
   /**
    * Create a Condition Object
