@@ -1,12 +1,12 @@
 import { mkdir, writeFile } from 'fs/promises'
-import { FillLayer, TextLayer, Template } from '../index'
+import { TextLayer, Template } from '../index'
 
 module.exports = {
   test: async function () {
     console.log('TEST[text] Started')
 
     const layers = [
-      new TextLayer({ size: { width: 100, height: 100 }, text: 'Testing', style: { fillStyle: 'white', font: 'Bold 20px Serif' }, align: { vertical: 'Middle', horizontal: 'Center' } }), // Center Static
+      new TextLayer({ size: { width: 100, height: 100 }, text: 'Testing', style: { fillStyle: 'white', font: 'Bold 20px Serif', opacity: 1.0 }, align: { vertical: 'Middle', horizontal: 'Center' } }), // Center Static
       new TextLayer({ size: { width: 100, height: 100 }, text: 'abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ', wrapText: true }) // Top Wrapped
     ]
 
