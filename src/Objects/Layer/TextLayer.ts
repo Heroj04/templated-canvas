@@ -5,9 +5,9 @@ import { Layer, type FillStyle, type Anchor, layerProperties } from './Layer'
  * An object representing the properties of a single piece of rendered text
  */
 export interface TextStyle {
-  font: string
-  fillStyle: FillStyle
-  opacity: number
+  font?: string
+  fillStyle?: FillStyle
+  opacity?: number
 }
 
 /**
@@ -107,7 +107,11 @@ export class TextLayer extends Layer {
   constructor (properties: TextLayerProperties) {
     super(properties)
     this.text = properties.text
-    this.style = properties.style ?? { font: 'Regular 10px Sans-Serif', fillStyle: 'black', opacity: 1.0 }
+    this.style = {
+      font: properties.style?.font ?? 'Regular 10px Sans-Serif',
+      fillStyle: properties.style?.fillStyle ?? 'black',
+      opacity: properties.style?.opacity ?? 1.0
+    }
     this.align = properties.align ?? { vertical: 'Top', horizontal: 'Left' }
     this.wrapText = properties.wrapText ?? false
     this.scaleText = properties.scaleText ?? false
@@ -305,8 +309,8 @@ export class TextLayer extends Layer {
    * @param style The style to use
    */
   static setContextTextStyle = (context: CanvasRenderingContext2D, style: TextStyle): void => {
-    context.fillStyle = style.fillStyle
-    context.font = style.font
-    context.globalAlpha = style.opacity
+    context.fillStyle = style.fillStyle ?? 'black'
+    context.font = style.font ?? 'Regular 10px Sans-Serif'
+    context.globalAlpha = style.opacity ?? 1.0
   }
 }
