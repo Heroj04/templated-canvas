@@ -44,6 +44,8 @@ export interface layerProperties {
   size: Size
   /** @defaultValue `['source-over']` */
   operations?: GlobalCompositeOperation[]
+  /** @defaultValue `1.0` */
+  opacity?: number
 }
 
 /**
@@ -55,6 +57,7 @@ export abstract class Layer implements DrawableElement {
   anchor: Anchor
   size: Size
   operations: GlobalCompositeOperation[]
+  opacity: number
 
   /**
    * Create a new layer object
@@ -65,6 +68,7 @@ export abstract class Layer implements DrawableElement {
     this.anchor = properties.anchor ?? { vertical: 'Top', horizontal: 'Left' }
     this.size = properties.size
     this.operations = properties.operations ?? ['source-over']
+    this.opacity = properties.opacity ?? 1.0
   }
 
   /**
