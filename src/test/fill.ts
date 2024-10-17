@@ -8,7 +8,7 @@ module.exports = {
     const layers = [
       new FillLayer({ size: { width: 100, height: 100 } }), // Background
       new FillLayer({ origin: { x: 50, y: 50 }, anchor: { vertical: 'Middle', horizontal: 'Center' }, size: { width: 80, height: 80 }, fillStyle: 'red' }), // Center Square
-      new FillLayer({ origin: { x: 100, y: 100 }, anchor: { vertical: 'Bottom', horizontal: 'Right' }, size: { width: 20, height: 20 }, fillStyle: 'blue' }) // Bottom Right Square
+      new FillLayer({ origin: { x: 100, y: 100 }, anchor: { vertical: 'Bottom', horizontal: 'Right' }, size: { width: 20, height: 20 }, fillStyle: 'blue', opacity: 0.5 }) // Bottom Right Square
     ]
 
     const template = new Template('Test Fill Template', 'Mr Hero', new URL('https://example.com'), { width: 100, height: 100 }, 300, [], layers)

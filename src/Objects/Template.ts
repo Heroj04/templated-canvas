@@ -113,6 +113,7 @@ export class Template implements DrawableElement {
       const getCorrectedOrigin = layer.getCorrectedOrigin()
       layer.operations.forEach(operation => {
         context.globalCompositeOperation = operation
+        context.globalAlpha = layer.opacity
         context.drawImage(layerCanvas, getCorrectedOrigin.x, getCorrectedOrigin.y)
       })
     }
