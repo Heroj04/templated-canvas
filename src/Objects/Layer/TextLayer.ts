@@ -7,6 +7,7 @@ import { Layer, type FillStyle, type Anchor, layerProperties } from './Layer'
 export interface TextStyle {
   font: string
   fillStyle: FillStyle
+  opacity: number
 }
 
 /**
@@ -106,7 +107,7 @@ export class TextLayer extends Layer {
   constructor (properties: TextLayerProperties) {
     super(properties)
     this.text = properties.text
-    this.style = properties.style ?? { font: 'Regular 10px Sans-Serif', fillStyle: 'black' }
+    this.style = properties.style ?? { font: 'Regular 10px Sans-Serif', fillStyle: 'black', opacity: 1.0 }
     this.align = properties.align ?? { vertical: 'Top', horizontal: 'Left' }
     this.wrapText = properties.wrapText ?? false
     this.scaleText = properties.scaleText ?? false
@@ -306,5 +307,6 @@ export class TextLayer extends Layer {
   static setContextTextStyle = (context: CanvasRenderingContext2D, style: TextStyle): void => {
     context.fillStyle = style.fillStyle
     context.font = style.font
+    context.globalAlpha = style.opacity
   }
 }
